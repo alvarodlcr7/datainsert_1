@@ -6,6 +6,12 @@ import os
 import pandas as pd
 
 
+
+import streamlit as st
+from google.oauth2.service_account import Credentials
+import gspread  # Si necesitas interactuar con Google Sheets
+
+
 st.title("Formulario para bebe Angie")
 nombre=st.text_input("Ingresa tu nombre")
 apellido=st.text_input("Ingresa tu apellido")
@@ -50,3 +56,24 @@ if st.button("Register"):
     # Mensaje personalizado para el usuario
     st.text(f"""Hola {nombre} {apellido}, tu fecha de nacimiento es {fecha_nacimiento}, tu género es {genero}, tu profesión es {profesion}.
     ¡Te adoro mucho!""")
+
+
+
+
+# Accede a las credenciales de Google desde los secretos
+google_credentials = st.secrets["google_credentials"]
+
+# Autenticación con las credenciales de Google
+credentials = Credentials.from_service_account_info(google_credentials)
+
+# Usar gspread para interactuar con Google Sheets
+gc = gspread.authorize(credentials)
+
+# Ahora puedes acceder a las hojas de cálculo de Google
+# Por ejemplo, abrir una hoja existente:
+sh = gc.open("Nombre de tu hoja de cálculo").sheet1
+
+# Acceder a los valores de la hoja
+valores = sh.get_all_values()
+st.write(valores)
+
