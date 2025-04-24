@@ -30,21 +30,23 @@ if st.button("Register"):
         "Desea ser notificado": notificar
     }
 
-    archivo_excel = "datos.xlsx"
+   # Definir el alcance para Google Sheets
+    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
-    # Verificamos si el archivo ya existe
-    if os.path.exists(archivo_excel):
-        # Leer el archivo existente y agregar el nuevo registro
-        df_existente = pd.read_excel(archivo_excel)
-        df_actualizado = pd.concat([df_existente, pd.DataFrame([nuevo_registro])], ignore_index=True)
-    else:
-        # Si no existe, creamos uno nuevo
-        df_actualizado = pd.DataFrame([nuevo_registro])
+    # Cargar las credenciales de Google desde los secretos de Streamlit
+    credentials = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["google_credentials"], scope)
 
-    # Guardar en Excel
-    df_actualizado.to_excel(archivo_excel, index=False, engine="openpyxl")
+    # Autorizar las credenciales y conectar con Google Sheets
+    client = gspread.authorize(credentials)
 
-    st.success("✅ Registro guardado con éxito")
+    # Abre la hoja de cálculo (asegúrate de que el nombre es correcto)
+    spreadsheet = client.open("Formulario para bebé Angie").sheet1
 
-    st.text(f"""Hola {nombre}{apellido}, tu fecha de nacimiento es {fecha_nacimiento},tu genero es {genero}, tu profesion es {profesion} te adoro" y solo quiero que sepas que te adoro mucho""")
-            
+    # Agregar el nuevo registro a Google Sheets
+    spreadsheet.append_row([nombre, apellido, str(fecha_nacimiento), genero, profesion, notificar])
+
+    st.success("✅ Registro guardado con éxito en Google Sheets!")
+
+    # Mensaje personalizado para el usuario
+    st.text(f"""Hola {nombre} {apellido}, tu fecha de nacimiento es {fecha_nacimiento}, tu género es {genero}, tu profesión es {profesion}.
+    ¡Te adoro mucho!""")
