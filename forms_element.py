@@ -1,79 +1,19 @@
-
-
-
-import streamlit as st
-import os
-import pandas as pd
-
-
-
 import streamlit as st
 from google.oauth2.service_account import Credentials
-import gspread  # Si necesitas interactuar con Google Sheets
+import gspread
+import pandas as pd
 
+st.title("Formulario para bebé Angie")
 
-st.title("Formulario para bebe Angie")
-nombre=st.text_input("Ingresa tu nombre")
-apellido=st.text_input("Ingresa tu apellido")
-fecha_nacimiento=st.date_input("Ingresa tu fecha de nacimiento",min_value="1900-01-01")
-genero=st.radio("Selecciona tu genero",["maculino","Femenino"])
-profesion=st.selectbox("Selecciona tu profesion",["Ingeniero","Psicologa","Arquitecto","Diseñadora"])
-notificar=st.checkbox("¿Desea ser notificado")
-estudios=None
+# Inputs del formulario
+nombre = st.text_input("Ingresa tu nombre")
+apellido = st.text_input("Ingresa tu apellido")
+fecha_nacimiento = st.date_input("Ingresa tu fecha de nacimiento", min_value=pd.to_datetime("1900-01-01"))
+genero = st.radio("Selecciona tu género", ["Masculino", "Femenino"])
+profesion = st.selectbox("Selecciona tu profesión", ["Ingeniero", "Psicóloga", "Arquitecto", "Diseñadora"])
+notificar = st.checkbox("¿Deseas ser notificado?")
 
-
-
-    # Acción al hacer clic en Registrar
-if st.button("Register"):
-
-    # Crear un nuevo registro
-    nuevo_registro = {
-        "Nombre": nombre,
-        "Apellido": apellido,
-        "Fecha de nacimiento": fecha_nacimiento,
-        "Género": genero,
-        "Profesión": profesion,
-        "Desea ser notificado": notificar
-    }
-
-   # Definir el alcance para Google Sheets
-    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-
-    # Cargar las credenciales de Google desde los secretos de Streamlit
-    credentials = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["google_credentials"], scope)
-
-    # Autorizar las credenciales y conectar con Google Sheets
-    client = gspread.authorize(credentials)
-
-    # Abre la hoja de cálculo (asegúrate de que el nombre es correcto)
-    spreadsheet = client.open("Formulario para bebé Angie").sheet1
-
-    # Agregar el nuevo registro a Google Sheets
-    spreadsheet.append_row([nombre, apellido, str(fecha_nacimiento), genero, profesion, notificar])
-
-    st.success("✅ Registro guardado con éxito en Google Sheets!")
-
-    # Mensaje personalizado para el usuario
-    st.text(f"""Hola {nombre} {apellido}, tu fecha de nacimiento es {fecha_nacimiento}, tu género es {genero}, tu profesión es {profesion}.
-    ¡Te adoro mucho!""")
-
-
-
-
-# Accede a las credenciales de Google desde los secretos
+# Cargar credenciales desde los secretos de Streamlit
 google_credentials = st.secrets["google_credentials"]
-
-# Autenticación con las credenciales de Google
-credentials = Credentials.from_service_account_info(google_credentials)
-
-# Usar gspread para interactuar con Google Sheets
-gc = gspread.authorize(credentials)
-
-# Ahora puedes acceder a las hojas de cálculo de Google
-# Por ejemplo, abrir una hoja existente:
-sh = gc.open("Nombre de tu hoja de cálculo").sheet1
-
-# Acceder a los valores de la hoja
-valores = sh.get_all_values()
-st.write(valores)
+credentials
 
